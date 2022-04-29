@@ -79,11 +79,12 @@ WSGI_APPLICATION = 'hackupc2022.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'motomami',
+        'NAME': 'defaultdb',
         'USER': 'doadmin',
         'PASSWORD': 'AVNS_XO01pWSFp3l7GMA',
         'HOST': 'hackupc22-do-user-11481145-0.b.db.ondigitalocean.com',
         'POST': '',
+        'PORT': '25060',
         'OPTIONS': {
             'sslmode':'verify-full',
             'sslrootcert': os.path.join(BASE_DIR, 'ca-certificate.crt')
