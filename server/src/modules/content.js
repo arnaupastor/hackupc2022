@@ -3,6 +3,7 @@ const router = express.Router();
 const users = require(`./users.json`);
 const {sql} = require(`../db.js`);
 const motos = require(`./motos.json`);
+var fs = require('fs');
 
 // --------------------------
 // GET API
@@ -57,11 +58,11 @@ function cosSimiliarity(vectorA, vectorB) {
         normA += Math.pow(num1, 2);
         normB += Math.pow(num2, 2);
 
-       /* console.log("num1", num1);
-        console.log("num2", num2);
-        console.log("dotProduct", dotProduct);
-        console.log("normA", normA);
-        console.log("normB", normB);*/
+        /* console.log("num1", num1);
+         console.log("num2", num2);
+         console.log("dotProduct", dotProduct);
+         console.log("normA", normA);
+         console.log("normB", normB);*/
     }
 
     if (Math.sqrt(normA) * Math.sqrt(normB) === 0) return 0;
@@ -89,7 +90,7 @@ function nameSimilarity(vectorA, vectorB) {
 
     if (union === 0) return 0;
 
-    return intersection/union;
+    return intersection / union;
 }
 
 function knn(motos, motoValorada) {
@@ -97,7 +98,7 @@ function knn(motos, motoValorada) {
     //let Map = require("collections/sorted-map");
     let result = new Map();
 
-    let {id,brand,model,version, ...numAttrValorat} = motoValorada;
+    let {id, brand, model, version, ...numAttrValorat} = motoValorada;
 
     let categoricalAttrValorat = [];
     categoricalAttrValorat.push(brand);
@@ -121,7 +122,7 @@ function knn(motos, motoValorada) {
 
     for (let moto of motos) {
 
-        let {id,brand,model,version, ...numAttr} = moto;
+        let {id, brand, model, version, ...numAttr} = moto;
 
         let categoricalAttr = [];
         categoricalAttr.push(brand);
@@ -134,8 +135,7 @@ function knn(motos, motoValorada) {
         //let versionMoto = version;
 
 
-
-        let sim = cosSimiliarity(numAttr,numAttrValorat);
+        let sim = cosSimiliarity(numAttr, numAttrValorat);
         let cate = nameSimilarity(categoricalAttrValorat, categoricalAttr);
 
         //console.log("moto referencia", idValorat);
@@ -148,7 +148,7 @@ function knn(motos, motoValorada) {
         //console.log("idMoto:", id);
         //console.log("sim:", sim);
 
-        let simFinal = sim*0.4 + cate*0.6;
+        let simFinal = sim * 0.4 + cate * 0.6;
         result.set(idMoto, simFinal);
     }
 
@@ -189,47 +189,74 @@ function getMotosById(motos, ids) {
 }
 
 
-
 router.get("/content",
     async (req, res) => {
 
-    const user = users.find(u => u.user_id = USER_ID);
-    //const motos = await sql.any(`SELECT * FROM versions`);
+        const user = users.find(u => u.user_id = USER_ID);
+        //const motos = await sql.any(`SELECT * FROM versions`);
 
 
-    //console.log(idValorats(user));
-    motosValorades = getMotosById(motos, idValorats(user));
-    motosClean = cleanDataset(motos, motosValorades);
+        //console.log(idValorats(user));
+        motosValorades = getMotosById(motos, idValorats(user));
+        motosClean = cleanDataset(motos, motosValorades);
 
-    function numvisits(id_moto) {
-        //console.log("id_moto",id_moto);
-        for (let moto of user.visits) {
-            //console.log("moto comparasion",moto.moto_id);
-            if (moto.moto_id === id_moto) return moto.visits;
+        function numvisits(id_moto) {
+            //console.log("id_moto",id_moto);
+            for (let moto of user.visits) {
+                //console.log("moto comparasion",moto.moto_id);
+                if (moto.moto_id === id_moto) return moto.visits;
+            }
+
+            return -1;
         }
 
-        return -1;
-    }
+        let k = 25;
+        let result = [];
+        for (let moto of motosValorades) {
+            let aux = Array.from(knn(motosClean, moto)).slice(0, k - 1);
+            //console.log(aux);
+            aux = aux.map(m => [m[0], m[1] * numvisits(moto.id)]);
+            //console.log(aux);
+            result = [...aux];
+            //console.log(result);
+        }
 
-    let k = 25;
-    let result = [];
-    for (let moto of motosValorades) {
-        let aux = Array.from(knn(motosClean, moto)).slice(0, k - 1);
-        //console.log(aux);
-        aux = aux.map(m => [m[0], m[1] * numvisits(moto.id)]);
-        //console.log(aux);
-        result =[...aux];
-        //console.log(result);
-    }
-
-    result = result.sort((a, b) => b[1] - a[1]);
-    result = result.slice(0, k - 1);
+        result = result.sort((a, b) => b[1] - a[1]);
+        result = result.slice(0, k - 1);
 
 
-    //console.log(motosValorades);
-    //res.send(motos);
+        //console.log(motosValorades);
+        //res.send(motos);
 
-    res.send(result);
-});
+        res.send(result);
+    });
+
+// function main() {
+//     const result = csvjson.map(m => {
+//         if (m.id && m.brand && m.model && m.version && m.year && m.km && m.sell_price) {
+//             return {
+//                 id: m.id,
+//                 brand: m.brand,
+//                 model: m.model,
+//                 version: m.version.toString(),
+//                 year: m.year,
+//                 km: m.km,
+//                 sell_price: m.sell_price
+//             }
+//         }
+//
+//
+//     }).filter(m => m);
+//
+//
+//     fs.writeFile("motomami.json", JSON.stringify(result), function(err) {
+//         if (err) {
+//             console.log(err);
+//         }
+//     });
+// }
+
+
+main()
 
 module.exports = router;
