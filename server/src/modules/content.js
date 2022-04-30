@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const users = require(`./users.json`);
-const {sql} = require(`../db.js`)
+const {sql} = require(`../db.js`);
+const motos = require(`./motos.json`);
 
 // --------------------------
 // GET API
@@ -71,9 +72,17 @@ function knn(motos, motoValorada) {
     //console.log("motoValorada",motoValorada);
     //let Map = require("collections/sorted-map");
     let result = new Map();
-    let {name, ...numAttrValorat} = motoValorada;
-    let nameValorat = name;
+    let {brand,model,version, ...numAttrValorat} = motoValorada;
+    let brandValorat = brand;
+    let modelValorat = model;
+    let versionValorat = version;
     let idMotoValorada = motoValorada.id;
+
+    console.log("brand",brand);
+    console.log("model",model);
+    console.log("version",version);
+    console.log("idMotoValorada",idMotoValorada);
+    console.log("numAttrValorat",numAttrValorat);
 
     //console.log("numAttrValorat:", numAttrValorat);
     //console.log("nameValorat:", nameValorat);
@@ -117,9 +126,10 @@ function getMotosById(motos, ids) {
     //console.log("ids: " + ids);
     //console.log("motos", motos);
     for (let moto of motos) {
+        //console.log(moto);
         //console.log(moto.id);
         //console.log("ids", ids);
-        if (ids.includes(parseInt(moto.id))) {
+        if (ids.includes(moto.id)) {
             motosSelected.push(moto);
         }
     }
@@ -131,7 +141,8 @@ router.get("/content",
     async (req, res) => {
 
     const user = users.find(u => u.user_id = USER_ID);
-    const motos = await sql.any(`SELECT * FROM versions`);
+    //const motos = await sql.any(`SELECT * FROM versions`);
+
 
     //console.log(idValorats(user));
     motosValorades = getMotosById(motos, idValorats(user));
@@ -144,36 +155,9 @@ router.get("/content",
     }*/
 
     //console.log(motosValorades);
-    //res.send(motosValorades);
-
-    function fromEntries (iterable) {
-        return [...iterable].reduce((obj, [key, val]) => {
-            obj[key] = val
-            return obj
-        }, {})}
-
-    //console.log();
-        /*
-     let aux1 = new Map;
-    aux1 = knn(motosClean, motosValorades[0])
-
-    let aux = {}
-    for (let i = 0; i < 5; ++i) {
-        console.log("key",aux1.keys())
-        aux[aux1.keys()[i]+''] = aux1.values()[i];
-    }
-    console.log("aux:",aux);
-
-    const obj = autoConvertMapToObject(knn(motosClean, motosValorades[0]));
-
-*/
-
-    res.send(Array.from(knn(motosClean, motosValorades[0])));
-
-    //console.log(knn(motosClean, motosValorades[0]));
     //res.send(motos);
-    //res.send(user);
 
+    res.send(Array.from(knn(motosClean, motosValorades[0])).slice(0,10));
 });
 
 module.exports = router;
