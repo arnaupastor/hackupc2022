@@ -38,6 +38,12 @@ app.use(cors({limit: "50mb"}));
 // Motos
 app.use("/api", require("./modules/motos"));
 
+// Collaborative
+app.use("/api", require("./modules/collaborative"));
+
+// Content
+app.use("/api", require("./modules/content"));
+
 // ---------------------------------------------
 // Middleware para Vue.js router mode history
 // ---------------------------------------------
