@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {sql} = require(`../db.js`);
+const motos = require(`./motos.json`)
 
 let users;
 // --------------------------
@@ -247,7 +248,7 @@ router.get("/collaborative",
 
 
         const data = await sql.any(`SELECT *
-                                    FROM visits                               `)
+                                    FROM visits`)
 
         const dataObj = {};
 
@@ -273,18 +274,25 @@ router.get("/collaborative",
             }
         })
 
+        //console.log(users)
+        //res.send({});
+        //return;
+        
 
-        const results = kmeans(3)
+        const results = kmeans(5)
+        
         let cluster_user_one = {
             points: []
         };
         let breaking = false
 
-
-        clusters_resultantes = results.clusters;
+        const clusters_resultantes = results.clusters
+      
         for (let k = 0; !breaking && k < clusters_resultantes.length; ++k) {
-            for (let l = 0; l < clusters_resultantes[k].points.length; l++) {
-                if (clusters_resultantes[k].points[l].user_id === 1) {
+            for (let l = 0; !breaking && l < clusters_resultantes[k].points.length; l++) {
+                //console.log(`point ${clusters_resultantes[k].points[l].user_id} in cluster of centroid: ${clusters_resultantes[k].centroid.user_id}`);
+                if (clusters_resultantes[k].points[l].user_id == 1) {
+                    //console.log("FOUND!!")
                     cluster_user_one = clusters_resultantes[k]
                     breaking = true
                 }
@@ -292,30 +300,54 @@ router.get("/collaborative",
             //console.log(clusters_resultantes[k])
         }
 
-        let best_bikes = new Map();
+
+
+        let best_bikes = {};
 
 
         if (cluster_user_one.points) {
             for (let i = 0; i < cluster_user_one.points.length; ++i) {
                 for (let j = 0; j < cluster_user_one.points[i].visits.length; ++j) {
-                    let id_moto = cluster_user_one.points[i].visits[j].moto_id;
-                    let visits_moto = cluster_user_one.points[i].visits[j].visits;
+                    if (cluster_user_one.points[i].user_id != 1) {
+                      let id_moto = cluster_user_one.points[i].visits[j].moto_id;
+                      let visits_moto = cluster_user_one.points[i].visits[j].visits;
 
-                    if (!best_bikes.has(id_moto)) best_bikes.set(id_moto, visits_moto);
-                    else {
+                      console.log(`evaluation of ${cluster_user_one.points[i].user_id} for the bike ${id_moto} => ${visits_moto}`)
+
+                      if (!(best_bikes[id_moto])) {
+                        best_bikes[id_moto] = visits_moto;
+                        console.log(`setting new entry of ${id_moto} = ${best_bikes[id_moto]}`)
+                      }
+                      else {
                         let old_value = best_bikes[id_moto];
-                        best_bikes.set(id_moto, visits_moto + old_value);
+                        best_bikes[id_moto] = visits_moto + old_value;
+
+                        console.log(`Old value of ${id_moto} => ${old_value}, changed to: ${visits_moto + old_value}`)
+                      }
                     }
                 }
             }
         }
 
-        const sorted_bikes = new Map([...best_bikes.entries()].sort((a, b) => b[1] - a[1]));
+        const sorted_bikes = Object.entries(best_bikes).sort((a, b) => b[1] - a[1]).map(b => b[0]);
+        console.log("SORTED BIKES: ------------------------")
         console.log(sorted_bikes)
-        const result = Array.from(sorted_bikes).splice(0, 24);
-        console.log(result)
+        const result = sorted_bikes.splice(0, 24);
+
+        const finalResult = [];
+        result.forEach(r => {
+            const info = getMotoInfo(r);
+            if (info) finalResult.push(info);
+        })
+
         res.send(result);
     });
 
+function getMotoInfo(moto_id) {
+  return motos.find(m => {
+      return m.id === moto_id
+  });
+
+}
 
 module.exports = router;
