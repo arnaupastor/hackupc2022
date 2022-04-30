@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {sql} = require("../db.js");
 const motos = require("./motos.json");
-//const Scraper = require('images-scraper');
+const {GOOGLE_IMG_SCRAP} = require('google-img-scrap');
 
 // --------------------------
 // Generate users
@@ -11,17 +11,29 @@ const motos = require("./motos.json");
 router.get("/motos",
     async (req, res) => {
 
-       // const google = new Scraper({
-       //     puppeteer: {
-       //         headless: false,
-       //     },
-       // });
-       //
-       // const results = await google.scrape('banana', 200);
-       // console.log('results', results);
+        let data = motos.splice(0, 10)
 
-        res.send(results);
+        res.send(data);
 
     });
+
+router.get("/image/:input",
+    async (req, res) => {
+        const image = await scrapImage(req.params.input);
+        console.log("-->", image)
+        res.send(image.url);
+    });
+
+async function scrapImage(input) {
+    const image = await GOOGLE_IMG_SCRAP({
+        search: input,
+        limit: 1,
+    });
+
+    if (image && image.result.length)
+        return image.result[0]
+    return ""
+}
+
 
 module.exports = router;
