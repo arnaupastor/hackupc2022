@@ -31,8 +31,8 @@ function cleanDataset(motos, motosValorades) {
         }
     }
 
-    console.log("size motos",motos.length);
-    console.log("size motos clean",motosClean.length);
+    //console.log("size motos",motos.length);
+    //console.log("size motos clean",motosClean.length);
 
     return motosClean;
 }
@@ -197,7 +197,7 @@ router.get("/content",
     //const motos = await sql.any(`SELECT * FROM versions`);
 
 
-    console.log(idValorats(user));
+    //console.log(idValorats(user));
     motosValorades = getMotosById(motos, idValorats(user));
     motosClean = cleanDataset(motos, motosValorades);
 
@@ -215,11 +215,11 @@ router.get("/content",
     let result = [];
     for (let moto of motosValorades) {
         let aux = Array.from(knn(motosClean, moto)).slice(0, k - 1);
-        console.log(aux);
+        //console.log(aux);
         aux = aux.map(m => [m[0], m[1] * numvisits(moto.id)]);
-        console.log(aux);
+        //console.log(aux);
         result =[...aux];
-        console.log(result);
+        //console.log(result);
     }
 
     result = result.sort((a, b) => b[1] - a[1]);
