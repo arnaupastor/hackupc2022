@@ -60,10 +60,10 @@ function getDistanceSQ(a, b) {
     else {
       return 1/coincidencias;
     }
-    
+
 }
 
-// Returns a label for each piece of data in the users. 
+// Returns a label for each piece of data in the users.
 function getLabels(centroids) {
   // prep data structure:
   const labels = [];
@@ -73,7 +73,7 @@ function getLabels(centroids) {
       centroid: centroids[c],
     };
   }
-  // For each element in the users, choose the closest centroid. 
+  // For each element in the users, choose the closest centroid.
   // Make that centroid the element's label.
   for (let i = 0; i < users.length; i++) {
     const a = users[i];
@@ -113,7 +113,7 @@ function exists_visitMean(llista,moto_id) {
 function getPointsMean(pointList) {
     const clusterUsers = pointList.length;
     const visitsMean = [];
-    
+
     for (let i = 0; i < pointList.length; i++) {
         const point = pointList[i];
         for (let j = 0; j < point.visits.length; j++) {
@@ -142,7 +142,7 @@ function getPointsMean(pointList) {
       visits: visitsMean
     };
 }
-  
+
 function recalculateCentroids(labels, k) {
     // Each centroid is the geometric mean of the points that
     // have that centroid's label. Important: If a centroid is empty (no points have
@@ -200,15 +200,17 @@ function shouldStop(oldCentroids, centroids, iterations) {
 }
 
 
+
+
 function kmeans(k) {
   if (users.length && users[0].visits.length && users.length > k) {
     // Initialize book keeping variables
     let iterations = 0;
     let oldCentroids, labels, centroids;
     index_fin = users.length;
-  
+
     // Initialize centroids randomly
-    
+
     centroids = getRandomCentroids(k);
 
     // Run the main k-means algorithm
@@ -220,7 +222,7 @@ function kmeans(k) {
       // Assign labels to each datapoint based on centroids
       labels = getLabels(centroids);
 
-      
+
       centroids = recalculateCentroids(labels, k);
     }
 
@@ -247,10 +249,48 @@ router.get("/collaborative",
 });*/
 
 const results = kmeans(3)
+let cluster_user_one
+let breaking = false
+
 
 clusters_resultantes = results.clusters;
-for (let k = 0; k < clusters_resultantes.length; ++k) {
-  console.log(clusters_resultantes[k])
+for (let k = 0; !breaking && k < clusters_resultantes.length; ++k) {
+    for (let l = 0; l < clusters_resultantes[k].points.length; l++) {
+        if (clusters_resultantes[k].points[l].user_id === 1) {
+            cluster_user_one = clusters_resultantes[k]
+            breaking = true
+        }
+    }
+  //console.log(clusters_resultantes[k])
 }
+
+
+for (let k = 0; k < cluster_user_one.points.length; ++k) {
+    //console.log(cluster_user_one.points[k])
+}
+
+let best_bikes = new Map();
+
+function slope(num) {
+    for (let i = 0; i < cluster_user_one.points.length; ++i) {
+        for (let j = 0; j < cluster_user_one.points[i].visits.length; ++j) {
+            let id_moto = cluster_user_one.points[i].visits[j].moto_id;
+            let visits_moto = cluster_user_one.points[i].visits[j].visits;
+
+            if (!best_bikes.has(id_moto)) best_bikes.set(id_moto, visits_moto);
+            else {
+                let old_value = best_bikes[id_moto];
+                best_bikes.set(id_moto, visits_moto + old_value);
+            }
+        }
+    }
+
+    const sorted_bikes = new Map([...best_bikes.entries()].sort((a, b) => b[1] - a[1]));
+    console.log(sorted_bikes);
+    // Map(4) {"b" => 1, "d" => 2, "a" => 3, "c" => 4}
+
+}
+
+slope(10);
 
 module.exports = router;
