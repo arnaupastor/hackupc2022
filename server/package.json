@@ -1,0 +1,33 @@
+{
+  "name": "node-ts-mysql",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/app.js",
+  "scripts": {
+    "serve": "node ./src/app.js",
+    "build:start": "NODE_ENV=production node app.js",
+    "start": "NODE_ENV=production node app.js",
+    "devbabel": "nodemon app.js --exec babel-node"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.12.8",
+    "@babel/core": "^7.12.9",
+    "@babel/node": "^7.12.6",
+    "@babel/preset-env": "^7.12.7",
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "connect-history-api-fallback": "^1.6.0",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "express-async-handler": "^1.2.0",
+    "https": "^1.0.0",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "pg-promise": "^10.11.1",
+    "postgres": "^3.1.0"
+  }
+}
