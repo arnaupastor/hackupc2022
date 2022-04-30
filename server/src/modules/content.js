@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const users = require(`./users.json`);
 const {sql} = require(`../db.js`);
 const motos = require(`./motos.json`);
 var fs = require('fs');
@@ -192,7 +191,23 @@ function getMotosById(motos, ids) {
 router.get("/content",
     async (req, res) => {
 
-        const user = users.find(u => u.user_id = USER_ID);
+        const users = await sql.any(`SELECT *
+                                     FROM visits
+                                     WHERE user_id = 1
+        `)
+
+        const user = {
+            "user_id": 1,
+            "visits": users.map(u => {
+                return {
+                    moto_id: u.moto_id,
+                    visits: u.visits
+                }
+            })
+        }
+
+
+        // const user = users.find(u => u.user_id = USER_ID);
         //const motos = await sql.any(`SELECT * FROM versions`);
 
 
@@ -210,53 +225,66 @@ router.get("/content",
             return -1;
         }
 
-        let k = 25;
+        let k = 10;
         let result = [];
         for (let moto of motosValorades) {
             let aux = Array.from(knn(motosClean, moto)).slice(0, k - 1);
-            //console.log(aux);
             aux = aux.map(m => [m[0], m[1] * numvisits(moto.id)]);
-            //console.log(aux);
-            result = [...aux];
-            //console.log(result);
+            if (aux && aux.length)
+                result.push(aux[0]);
         }
 
         result = result.sort((a, b) => b[1] - a[1]);
+        console.log(result)
         result = result.slice(0, k - 1);
 
 
         //console.log(motosValorades);
         //res.send(motos);
 
-        res.send(result);
+        const finalResult = [];
+        result.forEach(r => {
+            const info = getMotoInfo(r[0]);
+            info.prob = r[1];
+            if (info) finalResult.push(info);
+        })
+
+        res.send(finalResult);
     });
 
-// function main() {
-//     const result = csvjson.map(m => {
-//         if (m.id && m.brand && m.model && m.version && m.year && m.km && m.sell_price) {
-//             return {
-//                 id: m.id,
-//                 brand: m.brand,
-//                 model: m.model,
-//                 version: m.version.toString(),
-//                 year: m.year,
-//                 km: m.km,
-//                 sell_price: m.sell_price
-//             }
-//         }
-//
-//
-//     }).filter(m => m);
-//
-//
-//     fs.writeFile("motomami.json", JSON.stringify(result), function(err) {
-//         if (err) {
-//             console.log(err);
-//         }
-//     });
-// }
+function getMotoInfo(moto_id) {
+    return motos.find(m => {
+        return m.id === moto_id
+    });
+
+}
+
+function main() {
+    const result = motos.map(m => {
+        if (m.id && m.brand && m.model && m.version && m.year && m.km && m.sell_price) {
+            return {
+                id: m.id,
+                brand: m.brand,
+                model: m.model,
+                version: m.version.toString(),
+                year: m.year,
+                km: m.km,
+                sell_price: m.sell_price
+            }
+        }
 
 
-main()
+    }).filter(m => m);
+
+
+    fs.writeFile("./src/modules/motomami.json", JSON.stringify(result), function (err) {
+        if (err) {
+            console.log(err);
+        }
+    });
+}
+
+
+// main()
 
 module.exports = router;

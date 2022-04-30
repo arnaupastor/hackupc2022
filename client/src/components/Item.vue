@@ -1,13 +1,26 @@
 <template>
-  <v-card v-if="moto" class="rounded-lg shadow-md">
-    <div style="height: 200px; background-color: #d7d7d7">
+  <v-card v-if="moto"
+          width="280"
 
+          class="rounded-lg shadow-md ma-2">
+
+    <div style="height: 200px; background-color: #d7d7d7; position:relative;">
       <v-img v-if="image" :src="image"
              style="object-fit: fill; height: 200px"></v-img>
+
+      <v-tooltip top nudge-top="10">
+        <template v-slot:activator="{ on }">
+          <v-icon
+              v-on="on"
+              style="position: absolute; right: 10px; top: 10px; z-index: 10"
+              color="red darken-2">mdi-information-outline</v-icon>
+        </template>
+        Identificador: {{moto.id}}
+      </v-tooltip>
     </div>
     <v-divider></v-divider>
     <div class="d-flex pa-5" style="height: 80px">
-      <span style="flex: 1" class="title px-0 two-text pr-2">{{ moto.brand }} {{ moto.model }} {{ moto.version }}</span>
+      <span style="flex: 1" class="title px-0 two-text pr-2 text-uppercase">{{ moto.brand }} {{ moto.model }} {{ moto.version }}</span>
       <span class="red--text text--darken-2">{{ moto.sell_price }}€</span>
     </div>
     <span class="caption px-5" style="font-size: 13px !important;">{{ moto.year }}
