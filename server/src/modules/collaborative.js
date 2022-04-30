@@ -9,7 +9,7 @@ let users;
 // --------------------------
 
 const MAX_DIST = 10;
-const MAX_ITERATIONS = 4;
+const MAX_ITERATIONS = 6;
 
 var index_fin;
 
