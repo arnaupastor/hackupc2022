@@ -1,6 +1,9 @@
 <template>
   <div class="body d-flex" style="flex-direction: column">
+    <pre>
+
     {{ brands }}
+    </pre>
   </div>
 </template>
 
@@ -18,7 +21,7 @@ export default Vue.extend({
   }),
   methods: {
     async fetchBrands() {
-      const {data} = await this.axios.get("/collaborative");
+      const {data} = await this.axios.get("/content");
       this.brands = data;
     }
   }

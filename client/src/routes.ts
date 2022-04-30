@@ -16,6 +16,24 @@ const routes = [
                 );
         },
     },
+    {
+        path: "/collaborative",
+        name: "Collaborative",
+        component: function () {
+            return import(
+                /* webpackChunkName: "about" */ "./components/Collaborative.vue"
+                );
+        }
+    },
+    {
+        path: "/content",
+        name: "Content",
+        component: function () {
+            return import(
+                /* webpackChunkName: "about" */ "./components/Content.vue"
+                );
+        }
+    }
 ];
 const router = new VueRouter({
     mode: "hash", // USING CORDOVA

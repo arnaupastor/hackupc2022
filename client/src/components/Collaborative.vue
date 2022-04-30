@@ -1,6 +1,8 @@
 <template>
   <div class="body d-flex" style="flex-direction: column">
+    <pre>
     {{ brands }}
+    </pre>
   </div>
 </template>
 
@@ -8,7 +10,7 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  name: 'HelloWorld',
+  name: 'Collaborative',
   mounted() {
     this.fetchBrands();
   },
@@ -18,7 +20,7 @@ export default Vue.extend({
   }),
   methods: {
     async fetchBrands() {
-      const {data} = await this.axios.get("/brands");
+      const {data} = await this.axios.get("/collaborative");
       this.brands = data;
     }
   }

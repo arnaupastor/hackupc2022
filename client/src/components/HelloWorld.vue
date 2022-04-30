@@ -1,8 +1,6 @@
 <template>
   <div class="body d-flex" style="flex-direction: column">
-    <h1>
-      hola {{brands}}
-    </h1>
+    {{ brands }}
   </div>
 </template>
 
