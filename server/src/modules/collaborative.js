@@ -286,7 +286,7 @@ function slope(num) {
     }
 
     const sorted_bikes = new Map([...best_bikes.entries()].sort((a, b) => b[1] - a[1]));
-    console.log(sorted_bikes);
+    //console.log(sorted_bikes);
     // Map(4) {"b" => 1, "d" => 2, "a" => 3, "c" => 4}
 
 }
