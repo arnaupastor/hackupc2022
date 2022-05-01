@@ -9,7 +9,8 @@ let users;
 // --------------------------
 
 const MAX_DIST = 10;
-const MAX_ITERATIONS = 6;
+// TODO; const MAX_ITERATIONS = 6;
+const MAX_ITERATIONS = 3;
 
 var index_fin;
 
@@ -277,17 +278,17 @@ router.get("/collaborative",
         //console.log(users)
         //res.send({});
         //return;
-        
+
 
         const results = kmeans(5)
-        
+
         let cluster_user_one = {
             points: []
         };
         let breaking = false
 
         const clusters_resultantes = results.clusters
-      
+
         for (let k = 0; !breaking && k < clusters_resultantes.length; ++k) {
             for (let l = 0; !breaking && l < clusters_resultantes[k].points.length; l++) {
                 //console.log(`point ${clusters_resultantes[k].points[l].user_id} in cluster of centroid: ${clusters_resultantes[k].centroid.user_id}`);
@@ -301,7 +302,6 @@ router.get("/collaborative",
         }
 
 
-
         let best_bikes = {};
 
 
@@ -309,21 +309,20 @@ router.get("/collaborative",
             for (let i = 0; i < cluster_user_one.points.length; ++i) {
                 for (let j = 0; j < cluster_user_one.points[i].visits.length; ++j) {
                     if (cluster_user_one.points[i].user_id != 1) {
-                      let id_moto = cluster_user_one.points[i].visits[j].moto_id;
-                      let visits_moto = cluster_user_one.points[i].visits[j].visits;
+                        let id_moto = cluster_user_one.points[i].visits[j].moto_id;
+                        let visits_moto = cluster_user_one.points[i].visits[j].visits;
 
-                      console.log(`evaluation of ${cluster_user_one.points[i].user_id} for the bike ${id_moto} => ${visits_moto}`)
+                        console.log(`evaluation of ${cluster_user_one.points[i].user_id} for the bike ${id_moto} => ${visits_moto}`)
 
-                      if (!(best_bikes[id_moto])) {
-                        best_bikes[id_moto] = visits_moto;
-                        console.log(`setting new entry of ${id_moto} = ${best_bikes[id_moto]}`)
-                      }
-                      else {
-                        let old_value = best_bikes[id_moto];
-                        best_bikes[id_moto] = visits_moto + old_value;
+                        if (!(best_bikes[id_moto])) {
+                            best_bikes[id_moto] = visits_moto;
+                            console.log(`setting new entry of ${id_moto} = ${best_bikes[id_moto]}`)
+                        } else {
+                            let old_value = best_bikes[id_moto];
+                            best_bikes[id_moto] = visits_moto + old_value;
 
-                        console.log(`Old value of ${id_moto} => ${old_value}, changed to: ${visits_moto + old_value}`)
-                      }
+                            console.log(`Old value of ${id_moto} => ${old_value}, changed to: ${visits_moto + old_value}`)
+                        }
                     }
                 }
             }
@@ -334,20 +333,25 @@ router.get("/collaborative",
         console.log(sorted_bikes)
         const result = sorted_bikes.splice(0, 24);
 
-        const finalResult = [];
-        result.forEach(r => {
-            const info = getMotoInfo(r);
-            if (info) finalResult.push(info);
-        })
 
-        res.send(result);
+        let foundAll = false, i = 0;
+        const finalResult = [];
+        while (!foundAll && i < motos.length) {
+            const moto = motos[i];
+            result.forEach(r => {
+                if (moto.id == r) {
+                    finalResult.push(moto);
+                    if (finalResult.length === result.length)
+                        foundAll = true
+                }
+            })
+            i++;
+        }
+
+        console.log("finalResult", finalResult)
+
+        res.send(finalResult);
     });
 
-function getMotoInfo(moto_id) {
-  return motos.find(m => {
-      return m.id === moto_id
-  });
-
-}
 
 module.exports = router;
