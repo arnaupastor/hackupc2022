@@ -44,6 +44,9 @@ app.use("/api", require("./modules/collaborative"));
 // Content
 app.use("/api", require("./modules/content"));
 
+// Prediction
+app.use("/api", require("./modules/prediction"));
+
 // ---------------------------------------------
 // Middleware para Vue.js router mode history
 // ---------------------------------------------

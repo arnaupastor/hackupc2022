@@ -215,7 +215,6 @@ function kmeans(k) {
 
         // Run the main k-means algorithm
         while (!shouldStop(oldCentroids, centroids, iterations)) {
-            console.log(iterations);
             // Save old centroids for convergence test.
             oldCentroids = [...centroids];
             iterations++;
@@ -312,16 +311,13 @@ router.get("/collaborative",
                         let id_moto = cluster_user_one.points[i].visits[j].moto_id;
                         let visits_moto = cluster_user_one.points[i].visits[j].visits;
 
-                        console.log(`evaluation of ${cluster_user_one.points[i].user_id} for the bike ${id_moto} => ${visits_moto}`)
 
                         if (!(best_bikes[id_moto])) {
                             best_bikes[id_moto] = visits_moto;
-                            console.log(`setting new entry of ${id_moto} = ${best_bikes[id_moto]}`)
                         } else {
                             let old_value = best_bikes[id_moto];
                             best_bikes[id_moto] = visits_moto + old_value;
 
-                            console.log(`Old value of ${id_moto} => ${old_value}, changed to: ${visits_moto + old_value}`)
                         }
                     }
                 }
@@ -329,8 +325,6 @@ router.get("/collaborative",
         }
 
         const sorted_bikes = Object.entries(best_bikes).sort((a, b) => b[1] - a[1]).map(b => b[0]);
-        console.log("SORTED BIKES: ------------------------")
-        console.log(sorted_bikes)
         const result = sorted_bikes.splice(0, 24);
 
 
@@ -348,7 +342,6 @@ router.get("/collaborative",
             i++;
         }
 
-        console.log("finalResult", finalResult)
 
         res.send(finalResult);
     });

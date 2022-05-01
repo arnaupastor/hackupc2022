@@ -1,7 +1,7 @@
 import sys
 import joblib
+import re
 import pandas as pd
-from sklearn import *
 
 #print(sys.argv[1:])
 
@@ -18,13 +18,13 @@ entrada = {'brand': [sys.argv[1]],
            }
 
 data = pd.DataFrame(entrada)
-print(data)
+# print(data)
 
-
-pipeline = joblib.load('pipeline.joblib')
-tree_reg = joblib.load('treeRegressor.joblib')
+pipeline = joblib.load('./src/recomendationModels/pipeline.joblib')
+tree_reg = joblib.load('./src/recomendationModels/treeRegressor.joblib')
 
 data_prepared = pipeline.transform(data)
 prediction = tree_reg.predict(data_prepared)
+x = re.findall('[0-9]+', str(prediction))[0]
 
-print(prediction)
+print(x)

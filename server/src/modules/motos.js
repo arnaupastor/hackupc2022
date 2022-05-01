@@ -35,7 +35,7 @@ router.get("/moto/:id",
     async (req, res) => {
 
         const moto = motos.find(m => {
-            return m.id === d.moto_id
+            return m.id == req.params.id
         });
 
         res.send(moto);
