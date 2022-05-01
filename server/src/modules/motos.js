@@ -31,6 +31,16 @@ router.get("/motos",
     });
 
 
+router.get("/moto/:id",
+    async (req, res) => {
+
+        const moto = motos.find(m => {
+            return m.id === d.moto_id
+        });
+
+        res.send(moto);
+    });
+
 router.get("/image/:input",
     async (req, res) => {
         const image = await scrapImage(req.params.input);
