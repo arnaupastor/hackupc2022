@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const users = require(`./users.json`);
 const {sql} = require(`../db.js`);
 const motos = require(`./motos.json`);
 var fs = require('fs');
@@ -188,11 +187,45 @@ function getMotosById(motos, ids) {
     return motosSelected;
 }
 
+function getMotosByUniqueId(motos, id) {
+    motosSelected = []
+    //console.log("ids: " + ids);
+    //console.log("motos", motos);
+    for (let moto of motos) {
+        //console.log(moto);
+        //console.log("moto.id",moto.id);
+        //console.log("ids", ids);
+
+        if (id == moto.id) {
+            //console.log("coincidencia",moto.id);
+            motosSelected.push(moto);
+        }
+    }
+    //console.log("motosSelected", motosSelected);
+    return motosSelected;
+}
+
 
 router.get("/content",
     async (req, res) => {
 
-        const user = users.find(u => u.user_id = USER_ID);
+        const users = await sql.any(`SELECT *
+                                     FROM visits
+                                     WHERE user_id = 1
+        `)
+
+        const user = {
+            "user_id": 1,
+            "visits": users.map(u => {
+                return {
+                    moto_id: u.moto_id,
+                    visits: u.visits
+                }
+            })
+        }
+
+
+        // const user = users.find(u => u.user_id = USER_ID);
         //const motos = await sql.any(`SELECT * FROM versions`);
 
 
@@ -210,53 +243,135 @@ router.get("/content",
             return -1;
         }
 
-        let k = 25;
+        let k = 10;
         let result = [];
         for (let moto of motosValorades) {
             let aux = Array.from(knn(motosClean, moto)).slice(0, k - 1);
-            //console.log(aux);
             aux = aux.map(m => [m[0], m[1] * numvisits(moto.id)]);
-            //console.log(aux);
-            result = [...aux];
-            //console.log(result);
+            if (aux && aux.length)
+                result.push(aux[0]);
         }
 
         result = result.sort((a, b) => b[1] - a[1]);
+        console.log(result)
         result = result.slice(0, k - 1);
 
 
         //console.log(motosValorades);
         //res.send(motos);
 
-        res.send(result);
+        const finalResult = [];
+        result.forEach(r => {
+            const info = getMotoInfo(r[0]);
+            info.prob = r[1];
+            if (info) finalResult.push(info);
+        })
+
+        res.send(finalResult);
     });
 
-// function main() {
-//     const result = csvjson.map(m => {
-//         if (m.id && m.brand && m.model && m.version && m.year && m.km && m.sell_price) {
-//             return {
-//                 id: m.id,
-//                 brand: m.brand,
-//                 model: m.model,
-//                 version: m.version.toString(),
-//                 year: m.year,
-//                 km: m.km,
-//                 sell_price: m.sell_price
-//             }
-//         }
-//
-//
-//     }).filter(m => m);
-//
-//
-//     fs.writeFile("motomami.json", JSON.stringify(result), function(err) {
-//         if (err) {
-//             console.log(err);
-//         }
-//     });
-// }
+    
+    router.get("/content/:id",
+    async (req, res) => {
+
+        const users = await sql.any(`SELECT *
+                                     FROM visits
+                                     WHERE user_id = 1
+        `)
+
+        const user = {
+            "user_id": 1,
+            "visits": users.map(u => {
+                return {
+                    moto_id: u.moto_id,
+                    visits: u.visits
+                }
+            })
+        }
 
 
-main()
+        // const user = users.find(u => u.user_id = USER_ID);
+        //const motos = await sql.any(`SELECT * FROM versions`);
+
+
+        //console.log(idValorats(user));
+        //motosValorades = getMotosById(motos, idValorats(user));
+
+        const id = req.params.id;
+        motosValorades = getMotosByUniqueId(motos, id);
+
+        motosClean = cleanDataset(motos, motosValorades);
+
+        function numvisits(id_moto) {
+            //console.log("id_moto",id_moto);
+            for (let moto of user.visits) {
+                //console.log("moto comparasion",moto.moto_id);
+                if (moto.moto_id === id_moto) return moto.visits;
+            }
+
+            return -1;
+        }
+
+        let k = 10;
+        let result = [];
+        for (let moto of motosValorades) {
+            let aux = Array.from(knn(motosClean, moto)).slice(0, k - 1);
+            aux = aux.map(m => [m[0], m[1] * numvisits(moto.id)]);
+            if (aux && aux.length)
+                result.push(aux);
+        }
+
+        result = result.sort((a, b) => b[1] - a[1]);
+        console.log(result)
+        result = result.slice(0, k - 1);
+
+
+        //console.log(motosValorades);
+        //res.send(motos);
+
+        const finalResult = [];
+        result.forEach(r => {
+            const info = getMotoInfo(r[0]);
+            info.prob = r[1];
+            if (info) finalResult.push(info);
+        })
+
+        res.send(finalResult);
+    });
+
+function getMotoInfo(moto_id) {
+    return motos.find(m => {
+        return m.id === moto_id
+    });
+
+}
+
+function main() {
+    const result = motos.map(m => {
+        if (m.id && m.brand && m.model && m.version && m.year && m.km && m.sell_price) {
+            return {
+                id: m.id,
+                brand: m.brand,
+                model: m.model,
+                version: m.version.toString(),
+                year: m.year,
+                km: m.km,
+                sell_price: m.sell_price
+            }
+        }
+
+
+    }).filter(m => m);
+
+
+    fs.writeFile("./src/modules/motomami.json", JSON.stringify(result), function (err) {
+        if (err) {
+            console.log(err);
+        }
+    });
+}
+
+
+// main()
 
 module.exports = router;
