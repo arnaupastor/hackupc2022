@@ -22,7 +22,7 @@
         v-else
         multiple
         show-arrows
-        style="padding-right: 56px; padding-left: 56px; padding-top: 56px"
+        style="padding-right: 56px; padding-left: 56px; padding-top: 66px"
     >
       <v-slide-item
           v-for="(moto, idx) in 4"
@@ -30,7 +30,7 @@
       >
 
         <v-skeleton-loader
-            class="mx-auto px-2"
+            class="mx-auto px-2 rounded-lg"
             width="100%"
             height="393"
             type="image, article"

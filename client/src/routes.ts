@@ -17,23 +17,17 @@ const routes = [
         },
     },
     {
-        path: "/collaborative",
-        name: "Collaborative",
+        path: "/moto/:id",
+        name: "ProductPage",
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
         component: function () {
             return import(
-                /* webpackChunkName: "about" */ "./components/Collaborative.vue"
+                /* webpackChunkName: "about" */ "./components/ProductPage.vue"
                 );
-        }
+        },
     },
-    {
-        path: "/content",
-        name: "Content",
-        component: function () {
-            return import(
-                /* webpackChunkName: "about" */ "./components/Content.vue"
-                );
-        }
-    }
 ];
 const router = new VueRouter({
     mode: "hash", // USING CORDOVA

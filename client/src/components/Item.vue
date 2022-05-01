@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <v-card width="280"
-
+    <v-card
+        @click="$router.push({path: '/moto/'+ moto.id})"
+        width="280"
             class="rounded-lg shadow-md ma-2">
 
       <div style="height: 200px; background-color: #d7d7d7; position:relative;"
@@ -41,7 +41,6 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </div>
 </template>
 
 <script>
