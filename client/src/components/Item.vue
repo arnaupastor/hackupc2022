@@ -55,7 +55,7 @@ export default {
     moto: Object
   },
   async mounted() {
-    // await this.getImage()
+    await this.getImage()
   },
   methods: {
     async getImage() {
