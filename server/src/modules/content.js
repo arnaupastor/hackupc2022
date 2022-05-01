@@ -244,13 +244,7 @@ router.get("/content",
         }
 
         let k = 10;
-        let result = [];
-        for (let moto of motosValorades) {
-            let aux = Array.from(knn(motosClean, moto)).slice(0, k - 1);
-            aux = aux.map(m => [m[0], m[1] * numvisits(moto.id)]);
-            if (aux && aux.length)
-                result.push(aux[0]);
-        }
+        let result = Array.from(knn(motosClean, moto)).slice(0, k - 1);
 
         result = result.sort((a, b) => b[1] - a[1]);
         console.log(result)
