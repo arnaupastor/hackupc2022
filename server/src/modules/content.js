@@ -264,8 +264,8 @@ router.get("/content",
         res.send(finalResult);
     });
 
-    
-    router.get("/content/:id",
+
+router.get("/content/:id",
     async (req, res) => {
 
         const users = await sql.any(`SELECT *
@@ -324,11 +324,11 @@ router.get("/content",
         //res.send(motos);
 
         const finalResult = [];
-        result.forEach(r => {
-            const info = getMotoInfo(r[0]);
-            info.prob = r[1];
-            if (info) finalResult.push(info);
-        })
+        if (result.length)
+            result[0].forEach(r => {
+                const info = getMotoInfo(r[0]);
+                if (info) finalResult.push(info);
+            })
 
         res.send(finalResult);
     });
