@@ -4,8 +4,9 @@
          class="d-flex align-center justify-center"
 
     >
-      <v-img v-if="false"
-             style="object-fit: fill; height: 500px"></v-img>
+      <v-img v-if="image"
+             :src="image"
+             style="object-fit: fill; height: 500px; background-position: top center !important;"></v-img>
 
       <v-icon v-else color="grey" size="40">{{ random ? 'mdi-motorbike' : 'mdi-moped' }}</v-icon>
     </div>
@@ -43,14 +44,17 @@ export default Vue.extend({
   components: {
     MotoList
   },
-  mounted() {
-    this.fetchMoto();
-    this.fetchMotosContent();
+  async mounted() {
+    await this.fetchMoto();
+    await this.fetchMotosContent();
+    await this.getImage()
+
   },
   data: () => ({
     loading: false,
     loadingCol: false,
     moto: null,
+    image: null,
     motosCollaborative: []
   }),
   computed: {
@@ -59,6 +63,11 @@ export default Vue.extend({
     }
   },
   methods: {
+    async getImage() {
+      const input = `${this.moto.brand} ${this.moto.model} ${this.moto.version}`
+      const {data} = await this.axios.get(`/image/${input}`)
+      this.image = data
+    },
     formatNumber(number) {
       const exp = /(\d)(?=(\d{3})+(?!\d))/g;
       const rep = '$1.';
@@ -81,6 +90,13 @@ export default Vue.extend({
       } finally {
         this.loadingCol = false;
       }
+    }
+  },
+  watch: {
+    async '$route.params'() {
+      await this.fetchMoto();
+      await this.fetchMotosContent();
+      await this.getImage()
     }
   }
 });
