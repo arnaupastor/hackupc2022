@@ -4,7 +4,7 @@
 
 We talked with the mundimoto tech team and they encouraged us to develop this project.
 
-##What it does
+## What it does
 
 It consists of a recommendation system that makes suggestion about motorcycles based on the user preferences and those clients who are similar to them. It also makes price prediction using machine learning-type techniques.
 
